@@ -14,7 +14,7 @@ public class Receiver extends BroadcastReceiver {
     final static String TAG = "Receiver";
 
     @Override
-    public void onReceive( final Context context, Intent intent ) {
+    public void onReceive( final Context context, final Intent intent ) {
         String action = intent.getAction();
         Log.d( TAG, "action : " + action );
 
@@ -36,9 +36,15 @@ public class Receiver extends BroadcastReceiver {
         }
         else if( action.equals( "ota_progress_update" ) ){
             openOTADownloadingActivity( context, intent );
-            Intent in = new Intent( "ota_progress_update1" );
-            in.putExtras( intent.getExtras() );
-            context.sendBroadcast( in );
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    Intent in = new Intent( "ota_progress_update1" );
+                    in.putExtras( intent.getExtras() );
+                    context.sendBroadcast( in );
+                }
+            }, 2000 );
+
         }
         else if( action.equals( "ota_download_complete" ) ){
             openOTADownloadingActivity( context, intent );
@@ -47,7 +53,7 @@ public class Receiver extends BroadcastReceiver {
                 public void run() {
                     Intent in = new Intent( "ota_download_complete1" );
                     //in.putExtras( intent.getExtras() );
-                    in.putExtra( "show_prompt", true );
+                    in.putExtra( "show_prompt", intent.getBooleanExtra( "show_prompt", false ) );
                     context.sendBroadcast( in );
                 }
             }, 2000 );
@@ -66,8 +72,8 @@ public class Receiver extends BroadcastReceiver {
     private void openOTADownloadingActivity( Context context, Intent intent ){
         Intent in = new Intent( context, OTADownloadingActivity.class );
         in.addFlags( Intent.FLAG_ACTIVITY_NEW_TASK );
-        in.putExtra( "file_size", intent.getIntExtra( "file_size", -1 ) );
-        in.putExtra( "progress", intent.getDoubleExtra( "progress", 0 ) );
+        //in.putExtra( "file_size", intent.getIntExtra( "file_size", 0 ) );
+        //in.putExtra( "progress", intent.getDoubleExtra( "progress", 0 ) );
         context.startActivity( in );
     }
 

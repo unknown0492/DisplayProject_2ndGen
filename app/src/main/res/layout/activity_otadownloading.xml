@@ -23,6 +23,7 @@
         android:layout_centerHorizontal="true"
         android:gravity="center"
         android:orientation="vertical"
+        android:visibility="gone"
         android:layout_below="@+id/tv_message">
 
         <TextView

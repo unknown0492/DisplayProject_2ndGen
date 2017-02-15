@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -46,6 +45,7 @@ public class OTADownloadingActivity extends Activity {
             "reboot recovery";
 
     boolean showing = true;
+    boolean show_prompt;
 
     @Override
     protected void onCreate( Bundle savedInstanceState ) {
@@ -66,11 +66,7 @@ public class OTADownloadingActivity extends Activity {
 
         registerBroadcasts();
 
-        getData();
 
-        calculateSizes();
-
-        // startProgressTimer();
     }
 
     boolean postpone_clicked = false;
@@ -81,29 +77,12 @@ public class OTADownloadingActivity extends Activity {
         Log.d( TAG, "onPause()" );
 
         validatePrompt();
-        //postponeUpgrade();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         Log.d( TAG, "onResume()" );
-
-        /*handler.post(new Runnable() {
-            @Override
-            public void run() {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        getData();
-
-                        calculateSizes();
-                    }
-                });
-            }
-        });*/
-
-
 
     }
 
@@ -122,27 +101,6 @@ public class OTADownloadingActivity extends Activity {
         tv_download_complete = (TextView) findViewById( R.id.tv_download_complete );
     }
 
-
-    private void getData(){
-        Intent in = getIntent();
-        //ota_zip_file = new File( in.getStringExtra( "ota_zip_file_path" ) );
-        try {
-            file_size = in.getIntExtra( "file_size", 0 );
-            progress = in.getDoubleExtra( "progress", 0 );
-
-        }
-        catch( Exception e ){
-            file_size = 0;
-            progress = 0;
-            e.printStackTrace();
-        }
-        //Log.d( TAG, "File Path : " + ota_zip_file.getAbsolutePath());
-        Log.d( TAG, "File Size : " + file_size + " bytes" );
-
-    }
-
-    boolean show_prompt;
-
     private void registerBroadcasts(){
         progressUpdateReceiver = new BroadcastReceiver() {
 
@@ -150,13 +108,16 @@ public class OTADownloadingActivity extends Activity {
             public void onReceive(Context context, Intent intent ) {
                 //Log.i( TAG, "Progress Updated !" );
 
+                tv_message.setVisibility( View.VISIBLE );
+                ll_progress.setVisibility( View.VISIBLE );
+                tv_download_complete.setVisibility( View.GONE );
+
                 progress    = intent.getDoubleExtra( "progress", 0 );
-                file_size   = intent.getIntExtra( "file_size", 0 );
+                total       = intent.getDoubleExtra( "file_size", 0 );
 
                 Log.d( TAG, "Progress : " + progress + "%" );
-                //tv_total_size.setText( "" + total + " MB" );
-                //tv_progress.setText( "" + progress + "%" );
-                calculateSizes();
+
+                setSizes();
 
 
             }
@@ -173,25 +134,13 @@ public class OTADownloadingActivity extends Activity {
                 show_prompt = intent.getBooleanExtra( "show_prompt", false );
 
                 tv_message.setVisibility( View.GONE );
-
                 ll_progress.setVisibility( View.GONE );
-
                 tv_download_complete.setVisibility( View.VISIBLE );
 
                 if( show_prompt ){
                     showPrompt();
                 }
 
-               /* new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        *//*createUpdateScript();
-
-                        copyFirmwareToCache();
-
-                        verifyCacheFirmwareCopy();*//*
-                    }
-                }, 2000 );*/
             }
         };
         registerReceiver( downloadCompleteReceiver, new IntentFilter( "ota_download_complete1" ) );
@@ -220,6 +169,7 @@ public class OTADownloadingActivity extends Activity {
             @Override
             public void onClick( DialogInterface dialog, int which ) {
                 sendBroadcast( new Intent( "run_ota_upgrade" ) );
+                postpone_clicked = true;
                 dialog.dismiss();
             }
 
@@ -231,9 +181,10 @@ public class OTADownloadingActivity extends Activity {
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
+                        postpone_clicked = true;
                         finish();
                     }
-                }, 0 );
+                }, 2000 );
             }
         });
         ab.show();
@@ -252,53 +203,11 @@ public class OTADownloadingActivity extends Activity {
         sendBroadcast( in );
     }
 
-    private void calculateSizes(){
-        total    = Double.parseDouble( String.format( "%.2f", (double)file_size/(double)1024/(double)1024 ) );
+    private void setSizes(){
+        // total    = Double.parseDouble( String.format( "%.2f", (double)file_size/(double)1024/(double)1024 ) );
         tv_total_size.setText( "" + total + " MB" );
         tv_progress.setText( "" + progress + "%" );
         Log.d( TAG, "Total Size : " + total + " MB" );
-    }
-
-    private void startProgressTimer(){
-        new AsyncTask< Void, Void, Void >(){
-
-            @Override
-            protected Void doInBackground(Void... params) {
-                new Thread(new Runnable() {
-                    public void run() {
-                        while( true ){
-
-                            if( progress == total ){
-                                Log.d( TAG, "Download Completed !" );
-                                break;
-                            }
-
-                            handler.post(new Runnable() {
-                                public void run() {
-                                    progress = (ota_zip_file.length()/1024)/1024;   // size in MB
-                                    Log.d( TAG, "Progress : " + progress + " MB" );
-
-                                    tv_progress.setText( "" + progress + " MB" );
-
-                                }
-                            });
-
-
-
-                            try {
-                                Thread.sleep( 1000 );
-
-                            } catch ( InterruptedException e ) {
-                                e.printStackTrace();
-                            }
-
-                        }
-                    }
-                }).start();
-                return null;
-            }
-
-        }.execute();
     }
 
     private void createUpdateScript(){

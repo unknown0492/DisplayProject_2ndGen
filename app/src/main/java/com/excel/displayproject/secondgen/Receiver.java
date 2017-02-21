@@ -59,6 +59,10 @@ public class Receiver extends BroadcastReceiver {
             }, 2000 );
 
         }
+        else if( action.equals( "show_reboot_prompt" ) ){
+            openRebootPromptActivity( context );
+        }
+
 
     }
 
@@ -72,8 +76,12 @@ public class Receiver extends BroadcastReceiver {
     private void openOTADownloadingActivity( Context context, Intent intent ){
         Intent in = new Intent( context, OTADownloadingActivity.class );
         in.addFlags( Intent.FLAG_ACTIVITY_NEW_TASK );
-        //in.putExtra( "file_size", intent.getIntExtra( "file_size", 0 ) );
-        //in.putExtra( "progress", intent.getDoubleExtra( "progress", 0 ) );
+        context.startActivity( in );
+    }
+
+    private void openRebootPromptActivity( Context context ){
+        Intent in = new Intent( context, RebootPromptActivity.class );
+        in.addFlags( Intent.FLAG_ACTIVITY_NEW_TASK );
         context.startActivity( in );
     }
 

@@ -38,6 +38,7 @@
                 <action android:name="ota_progress_update1" />
                 <action android:name="ota_download_complete" />
                 <action android:name="ota_download_complete1" />
+                <action android:name="show_reboot_prompt" />
             </intent-filter>
         </receiver>
 
@@ -45,6 +46,12 @@
             android:name=".OTADownloadingActivity"
             android:launchMode="singleInstance"
             android:theme="@android:style/Theme.Wallpaper.NoTitleBar.Fullscreen"></activity>
+
+        <activity
+            android:name=".RebootPromptActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"
+            android:launchMode="singleInstance">
+        </activity>
 
     </application>
 

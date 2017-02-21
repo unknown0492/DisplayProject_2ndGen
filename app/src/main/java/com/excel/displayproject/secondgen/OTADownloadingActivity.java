@@ -24,6 +24,8 @@ import com.excel.util.MD5;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class OTADownloadingActivity extends Activity {
 
@@ -38,6 +40,9 @@ public class OTADownloadingActivity extends Activity {
     BroadcastReceiver progressUpdateReceiver, downloadCompleteReceiver;
     ConfigurationReader configurationReader;
     String new_firmware_md5 = "";
+    Timer countdown;
+    int counter = 30;
+
 
     // Script
     public static final String FIRMWARE_UPDATE_SCRIPT			= 	"echo 'boot-recovery ' > /cache/recovery/command\n" +
@@ -170,27 +175,75 @@ public class OTADownloadingActivity extends Activity {
             public void onClick( DialogInterface dialog, int which ) {
                 sendBroadcast( new Intent( "run_ota_upgrade" ) );
                 postpone_clicked = true;
+                stopTimer();
                 dialog.dismiss();
             }
 
         });
-        ab.setNegativeButton("No", new DialogInterface.OnClickListener() {
+        ab.setNegativeButton( "No", new DialogInterface.OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialog, int which) {
+            public void onClick( final DialogInterface dialog, int which) {
                 postponeUpgrade();
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         postpone_clicked = true;
+                        dialog.dismiss();
+                        stopTimer();
                         finish();
                     }
                 }, 2000 );
             }
         });
         ab.show();
+        startTimer();
     }
 
-    //boolean upgrade_postponed = false;
+
+    private void startTimer(){
+        counter = 30;
+        countdown = new Timer();
+        countdown.scheduleAtFixedRate( new TimerTask() {
+
+            @Override
+            public void run() {
+                Log.i( TAG, "Timer : "+counter );
+                if( counter == 0 ){
+                    /*UtilShell.executeShellCommandWithOp( "reboot" );
+                    //stopTimer( di );*/
+                    sendBroadcast( new Intent( "run_ota_upgrade" ) );
+                    postpone_clicked = true;
+                    stopTimer();
+                    finish();
+                    return;
+                }
+                counter--;
+            }
+
+        }, 0, 1000 );
+    }
+
+    private void stopTimer(){
+        Log.i( TAG, "Timer stopped" );
+        countdown.cancel();
+    }
+
+    /*private void updateCountdown(){
+		*//*Intent intent = new Intent( "update-countdown" );
+		LocalBroadcastManager.getInstance( this ).sendBroadcast( intent );*//*
+
+        new Handler( Looper.getMainLooper() ).post(new Runnable() {
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        tv_countdown.setText( counter+"" );
+                    }
+                });
+            }
+        });
+    }*/
 
     private void postponeUpgrade(){
         /*AlarmManager am = (AlarmManager) getSystemService( ALARM_SERVICE );

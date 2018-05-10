@@ -140,10 +140,10 @@ public class RebootPromptActivity extends Activity {
 	@Override
 	public boolean onKeyDown( int keyCode, KeyEvent event ) {
 		Log.d( TAG, "keyCode : "+keyCode );
-		/*if( keyCode == 111 ){ // back button override
+		if( keyCode == 4 ){ // back button override
 			return true;
-		}*/
-		return true; //super.onKeyDown(keyCode, event);
+		}
+		return false; //super.onKeyDown(keyCode, event);
 	}
 	
 	private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {

@@ -14,6 +14,8 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.excel.excelclasslibrary.Constants;
+import com.excel.excelclasslibrary.UtilMisc;
 import com.excel.excelclasslibrary.UtilShell;
 
 import java.util.Timer;
@@ -48,6 +50,7 @@ public class RebootPromptActivity extends Activity {
 
         if( ! postpone_clicked ){
             sendBroadcast( new Intent( "postpone_reboot" ) );
+
         }
     }
 
@@ -74,7 +77,9 @@ public class RebootPromptActivity extends Activity {
 				stopTimer();
 				
 				// Set Alarm for Next Hour of same day
-				sendBroadcast( new Intent( "postpone_reboot" ) );
+				//sendBroadcast( new Intent( "postpone_reboot" ) );
+				// Received inside RemotelyControlAppsTV
+				UtilMisc.sendExplicitExternalBroadcast( context, "postpone_reboot", Constants.REMOTELYCONTROL_PACKAGE_NAME, Constants.REMOTELYCONTROL_RECEIVER_NAME );
 				
 				//dispatchKeyEvent( new KeyEvent( KeyEvent.ACTION_DOWN, 3 ) );
 
@@ -146,13 +151,7 @@ public class RebootPromptActivity extends Activity {
 		return true; //super.onKeyDown(keyCode, event);
 	}
 	
-	private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
-		
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			tv_countdown.setText( counter+"" );
-		}
-	};
+
 	
 	
 }

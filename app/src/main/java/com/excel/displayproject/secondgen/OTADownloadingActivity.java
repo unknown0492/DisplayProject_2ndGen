@@ -19,6 +19,8 @@ import android.widget.Toast;
 
 import com.excel.configuration.ConfigurationReader;
 import com.excel.customitems.CustomItems;
+import com.excel.excelclasslibrary.Constants;
+import com.excel.excelclasslibrary.UtilMisc;
 import com.excel.excelclasslibrary.UtilShell;
 import com.excel.util.MD5;
 
@@ -29,28 +31,35 @@ import java.util.TimerTask;
 
 public class OTADownloadingActivity extends Activity {
 
-    TextView tv_progress, tv_total_size, tv_message, tv_download_complete;
-    LinearLayout ll_progress;
-    double progress, total;
-    File ota_zip_file;
-    int file_size;
-    final static String TAG = "OTADownloadingActivity";
-    Handler handler = new Handler();
-    Context context;
-    BroadcastReceiver progressUpdateReceiver, downloadCompleteReceiver;
-    ConfigurationReader configurationReader;
-    String new_firmware_md5 = "";
-    Timer countdown;
-    int counter = 30;
 
+    final static String TAG = "OTADownloadingActivity";
 
     // Script
     public static final String FIRMWARE_UPDATE_SCRIPT			= 	"echo 'boot-recovery ' > /cache/recovery/command\n" +
             "echo '--update_package=/cache/update.zip' >> /cache/recovery/command\n"+
             "reboot recovery";
 
-    boolean showing = true;
+    ConfigurationReader configurationReader;
+    Context context;
+    Timer countdown;
+    int counter = 30;
+    BroadcastReceiver downloadCompleteReceiver;
+    int file_size;
+    Handler handler = new Handler();
+    LinearLayout ll_progress;
+    String new_firmware_md5 = "";
+    File ota_zip_file;
+
+    boolean postpone_clicked = false;
+    double progress;
+    BroadcastReceiver progressUpdateReceiver;
     boolean show_prompt;
+    boolean showing = true;
+    double total;
+    TextView tv_download_complete;
+    TextView tv_message;
+    TextView tv_progress;
+    TextView tv_total_size;
 
     @Override
     protected void onCreate( Bundle savedInstanceState ) {
@@ -61,7 +70,6 @@ public class OTADownloadingActivity extends Activity {
 
         init();
 
-
     }
 
 
@@ -70,11 +78,7 @@ public class OTADownloadingActivity extends Activity {
         initViews();
 
         registerBroadcasts();
-
-
     }
-
-    boolean postpone_clicked = false;
 
     @Override
     protected void onPause() {
@@ -96,6 +100,8 @@ public class OTADownloadingActivity extends Activity {
         super.onDestroy();
         Log.d( TAG, "onDestroy()" );
 
+        unregisterReceiver( progressUpdateReceiver );
+        unregisterReceiver( downloadCompleteReceiver );
     }
 
     private void initViews(){
@@ -246,14 +252,10 @@ public class OTADownloadingActivity extends Activity {
     }*/
 
     private void postponeUpgrade(){
-        /*AlarmManager am = (AlarmManager) getSystemService( ALARM_SERVICE );
-        Intent in = new Intent( "ota_download_complete" );
-        in.putExtra( "show_prompt", true );
-        PendingIntent pi = PendingIntent.getBroadcast( context, 0, in, 0 );
-        am.set( AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 20000, pi );
-        upgrade_postponed = true;*/
-        Intent in = new Intent( "postpone_ota_upgrade" );
-        sendBroadcast( in );
+        /*Intent in = new Intent( "postpone_ota_upgrade" );
+        sendBroadcast( in );*/
+
+        UtilMisc.sendExplicitExternalBroadcast( context, "postpone_ota_upgrade", Constants.DATADOWNLOADER_PACKAGE_NAME, Constants.DATADOWNLOADER_RECEIVER_NAME );
     }
 
     private void setSizes(){

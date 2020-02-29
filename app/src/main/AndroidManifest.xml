@@ -29,10 +29,8 @@
         </activity>
 
         <receiver android:name=".Receiver"
-            android:enabled="true"
             android:exported="true">
             <intent-filter>
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
                 <action android:name="show_ota_downloading" />
                 <action android:name="ota_progress_update" />
                 <action android:name="ota_progress_update1" />

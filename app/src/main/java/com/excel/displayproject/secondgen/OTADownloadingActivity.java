@@ -17,6 +17,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import com.excel.configuration.ConfigurationReader;
 import com.excel.customitems.CustomItems;
 import com.excel.excelclasslibrary.Constants;
@@ -133,8 +135,8 @@ public class OTADownloadingActivity extends Activity {
 
             }
         };
-        registerReceiver( progressUpdateReceiver, new IntentFilter( "ota_progress_update1" ) );
-        //LocalBroadcastManager.getInstance( context ).registerReceiver( progressUpdateReceiver, new IntentFilter( "ota_progress_update" ) );
+        //registerReceiver( progressUpdateReceiver, new IntentFilter( "ota_progress_update1" ) );
+        LocalBroadcastManager.getInstance( context ).registerReceiver( progressUpdateReceiver, new IntentFilter( "ota_progress_update1" ) );
 
         downloadCompleteReceiver = new BroadcastReceiver() {
 
@@ -154,8 +156,8 @@ public class OTADownloadingActivity extends Activity {
 
             }
         };
-        registerReceiver( downloadCompleteReceiver, new IntentFilter( "ota_download_complete1" ) );
-        //LocalBroadcastManager.getInstance( context ).registerReceiver( downloadCompleteReceiver, new IntentFilter( "ota_download_complete" ) );
+        // registerReceiver( downloadCompleteReceiver, new IntentFilter( "ota_download_complete1" ) );
+        LocalBroadcastManager.getInstance( context ).registerReceiver( downloadCompleteReceiver, new IntentFilter( "ota_download_complete1" ) );
     }
 
     private void validatePrompt(){
@@ -179,7 +181,9 @@ public class OTADownloadingActivity extends Activity {
 
             @Override
             public void onClick( DialogInterface dialog, int which ) {
-                sendBroadcast( new Intent( "run_ota_upgrade" ) );
+                // sendBroadcast( new Intent( "run_ota_upgrade" ) );
+                // Sending this broadcast to DataDownloader
+                UtilMisc.sendExplicitExternalBroadcast( context, "run_ota_upgrade", Constants.DATADOWNLOADER_PACKAGE_NAME, Constants.DATADOWNLOADER_RECEIVER_NAME );
                 postpone_clicked = true;
                 stopTimer();
                 dialog.dismiss();
@@ -217,7 +221,9 @@ public class OTADownloadingActivity extends Activity {
                 if( counter == 0 ){
                     /*UtilShell.executeShellCommandWithOp( "reboot" );
                     //stopTimer( di );*/
-                    sendBroadcast( new Intent( "run_ota_upgrade" ) );
+                    // sendBroadcast( new Intent( "run_ota_upgrade" ) );
+                    // Sending this broadcast to DataDownloader
+                    UtilMisc.sendExplicitExternalBroadcast( context, "run_ota_upgrade", Constants.DATADOWNLOADER_PACKAGE_NAME, Constants.DATADOWNLOADER_RECEIVER_NAME );
                     postpone_clicked = true;
                     stopTimer();
                     finish();

@@ -6,6 +6,9 @@ import android.content.Intent;
 import android.os.Handler;
 import android.util.Log;
 
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
+import com.excel.excelclasslibrary.UtilMisc;
 import com.excel.excelclasslibrary.UtilShell;
 
 
@@ -18,7 +21,7 @@ public class Receiver extends BroadcastReceiver {
         String action = intent.getAction();
         Log.d( TAG, "action : " + action );
 
-        if( action.equals( "android.net.conn.CONNECTIVITY_CHANGE" ) || action.equals( "connectivity_changed" ) ){
+        if( action.equals( "connectivity_change" ) ){
 
             // 1. First time in order to receive broadcasts, the app should be started at least once
             startMe( context );
@@ -41,7 +44,10 @@ public class Receiver extends BroadcastReceiver {
                 public void run() {
                     Intent in = new Intent( "ota_progress_update1" );
                     in.putExtras( intent.getExtras() );
-                    context.sendBroadcast( in );
+                    //context.sendBroadcast( in );
+                    LocalBroadcastManager.getInstance( context ).sendBroadcast( in );
+
+
                 }
             }, 2000 );
 
@@ -54,7 +60,8 @@ public class Receiver extends BroadcastReceiver {
                     Intent in = new Intent( "ota_download_complete1" );
                     //in.putExtras( intent.getExtras() );
                     in.putExtra( "show_prompt", intent.getBooleanExtra( "show_prompt", false ) );
-                    context.sendBroadcast( in );
+                    // context.sendBroadcast( in );
+                    LocalBroadcastManager.getInstance( context ).sendBroadcast( in );
                 }
             }, 2000 );
 

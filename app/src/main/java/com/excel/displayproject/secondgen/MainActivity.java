@@ -2,6 +2,8 @@ package com.excel.displayproject.secondgen;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -15,7 +17,9 @@ import com.excel.displayproject.util.Constants;
 import com.excel.excelclasslibrary.UtilSharedPreferences;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Vector;
 
 public class MainActivity extends Activity {
 
@@ -32,11 +36,14 @@ public class MainActivity extends Activity {
     };
 
     SharedPreferences spfs;
+    BroadcastReceiver receiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        registerAllBroadcasts();
 
         spfs = (SharedPreferences) UtilSharedPreferences.createSharedPreference( this, Constants.PERMISSION_SPFS );
 
@@ -50,6 +57,34 @@ public class MainActivity extends Activity {
         else{
             finish();
         }
+    }
+
+    Vector<IntentFilter> intentFilterVector;
+
+    private void registerAllBroadcasts(){
+        receiver = new Receiver();
+        intentFilterVector = new Vector<IntentFilter>();
+        intentFilterVector.add( new IntentFilter( "connectivity_change" ) );
+        intentFilterVector.add( new IntentFilter( "show_ota_downloading" ) );
+        intentFilterVector.add( new IntentFilter( "ota_progress_update" ) );
+        intentFilterVector.add( new IntentFilter( "ota_download_complete" ) );
+        intentFilterVector.add( new IntentFilter( "ota_download_complete1" ) );
+        intentFilterVector.add( new IntentFilter( "ota_progress_update1" ) );
+        intentFilterVector.add( new IntentFilter( "show_reboot_prompt" ) );
+        // intentFilterVector.add( new IntentFilter( "" ) );
+
+        Iterator<IntentFilter> iterator = intentFilterVector.iterator();
+        while( iterator.hasNext() ){
+            registerReceiver( receiver, iterator.next() );
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        unregisterReceiver( receiver );
+
     }
 
     @Override

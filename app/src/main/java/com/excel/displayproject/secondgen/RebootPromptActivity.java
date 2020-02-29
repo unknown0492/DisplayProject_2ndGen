@@ -49,7 +49,9 @@ public class RebootPromptActivity extends Activity {
         Log.d( TAG, "onPause()" );
 
         if( ! postpone_clicked ){
-            sendBroadcast( new Intent( "postpone_reboot" ) );
+            // sendBroadcast( new Intent( "postpone_reboot" ) );
+            // Sending this broadcast to RemotelyControlAppsTV
+            UtilMisc.sendExplicitExternalBroadcast( context, "run_ota_upgrade", Constants.REMOTELYCONTROL_PACKAGE_NAME, Constants.REMOTELYCONTROL_RECEIVER_NAME );
 
         }
     }

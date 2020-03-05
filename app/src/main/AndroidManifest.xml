@@ -37,6 +37,8 @@
                 <action android:name="ota_download_complete" />
                 <action android:name="ota_download_complete1" />
                 <action android:name="show_reboot_prompt" />
+                <action android:name="connectivity_change" />
+
             </intent-filter>
         </receiver>
 
